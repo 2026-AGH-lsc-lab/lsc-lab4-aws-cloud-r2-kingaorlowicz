@@ -1,6 +1,9 @@
 # AWS Cloud Lab — Report
 The objective of this lab was to measure and compare the latency and cost of three different AWS execution environments: AWS Lambda (Serverless), ECS Fargate (Containers-as-a-Service), and EC2 (Virtual Machines). All environments ran the same application logic: a compute-heavy brute-force k-nearest-neighbor (k-NN) search over a dataset of 50,000 vectors.
 
+## Assignment 1: Deploy All Environments
+I have successfully deployed all environments and verified that they are functional. The terminal output showing the successful responses and matching results from all four endpoints has been saved to results/assignment-1-endpoints.txt.
+
 ## Assignment 2: Scenario A — Cold Start Characterization
 In this scenario, I measured the "cold start" latency for both AWS Lambda deployment types: Zip and Container. A cold start happens when Lambda has been idle for a long time (over 20 minutes), and AWS must create a new execution environment to handle the request. I sent 30 sequential requests to each endpoint to compare the very first "cold" request with the 29 "warm" requests that followed.
 ### Latency Decomposition and Network RTT
@@ -9,7 +12,7 @@ Using the formulas provided:
 * For Cold Starts: $Network RTT = Total Latency - Init Duration - Duration$. 
 * For Warm Starts: $Network RTT = Total Latency - Duration$.
 
-[fig1]
+![Latency Decomposition Chart](figures/fig1_latency_decomposition.png)
 
 In my measurements, the Container deployment was faster during a cold start.
 * Initialization: The Container's Init Duration (587.05 ms) was shorter than the Zip's (625.58 ms). While Zip files are usually smaller, AWS uses advanced caching to make container starts very efficient in regions like us-east-1.
@@ -19,7 +22,7 @@ In my measurements, the Container deployment was faster during a cold start.
 ## Assignment 3: Scenario B — Warm Steady-State Throughput
 In this scenario, I tested all four environments under a steady load of 500 requests to measure their performance once they are already "warm". I used two different concurrency levels for each to see how they handle simultaneous traffic. Due to AWS Academy limits, Lambda was tested at c=5 and c=10, while Fargate and EC2 were tested at c=10 and c=50.
 
-[fig2]
+![Latency Table](figures/fig2_latency_table.png)
 
 ### Why Lambda p50 is stable vs. Fargate/EC2 p50 increases
 The results show that Lambda's p50 stays very consistent  regardless of whether the concurrency is 5 or 10. This is because Lambda uses a "request-per-instance" model - for every simultaneous request, AWS provides a dedicated execution environment with its own CPU resources. In contrast, Fargate and EC2 p50 latencies increased dramatically when moving from c=10 to c=50. These environments use a "shared-resource" model where a single instance handles all traffic. 
@@ -89,5 +92,7 @@ In this scenario, AWS Lambda is the only environment with a zero idle cost. This
 * Lambda Cost per Request: $0.0000002 (Requests) + $0.000000616 (Duration/RAM) = $0.000000816
 * Total Requests to Break-even: $17.77 / $0.000000816 = 21,777,000 requests per month
 * Break-even RPS: 21,777,000 / (30 * 24 * 3600) = 8.4 RPS
+
+![Costs](figures/fig3_costs.png)
 
 
