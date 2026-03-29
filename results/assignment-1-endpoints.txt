@@ -1,0 +1,28 @@
+LAMBDA ZIP:
+[ec2-user@ip-172-31-66-113 lsc-lab4-aws-cloud-r2-kingaorlowicz]$ aws lambda invoke --function-name lsc-knn-zip \
+>     --cli-binary-format raw-in-base64-out \
+>     --payload "$(python3 -c 'import json; q=json.load(open("loadtest/query.json")); print(json.dumps({"body": json.dumps(q)}))')" \
+>     /tmp/out.json
+{
+    "StatusCode": 200,
+    "ExecutedVersion": "$LATEST"
+}
+
+LAMBDA CONTAINER:
+[ec2-user@ip-172-31-66-113 lsc-lab4-aws-cloud-r2-kingaorlowicz]$ aws lambda invoke --function-name lsc-knn-container \
+>     --cli-binary-format raw-in-base64-out \
+>     --payload "$(python3 -c 'import json; q=json.load(open("loadtest/query.json")); print(json.dumps({"body": json.dumps(q)}))')" \
+>     /tmp/out.json
+
+{
+    "StatusCode": 200,
+    "ExecutedVersion": "$LATEST"
+}
+FARGATE:
+[ec2-user@ip-172-31-66-113 lsc-lab4-aws-cloud-r2-kingaorlowicz]$ curl -X POST -H "Content-Type: application/json" -d @loadtest/query.json \http://lsc-knn-alb-490713158.us-east-1.elb.amazonaws.com/search
+{"instance_id":"ip-172-31-42-10.ec2.internal","query_time_ms":26.051,"results":[{"distance":12.001459121704102,"index":35859},{"distance":12.059946060180664,"index":24682},{"distance":12.487079620361328,"index":35397},{"distance":12.489519119262695,"index":20160},{"distance":12.499402046203613,"index":30454}]}
+
+EC2:
+[ec2-user@ip-172-31-66-113 lsc-lab4-aws-cloud-r2-kingaorlowicz]$ curl -X POST -H "Content-Type: application/json" -d @loadtest/query.json \
+>     http://32.195.204.47:8080/search
+{"instance_id":"0a78148378dc","query_time_ms":27.3,"results":[{"distance":12.001459121704102,"index":35859},{"distance":12.059946060180664,"index":24682},{"distance":12.487079620361328,"index":35397},{"distance":12.489519119262695,"index":20160},{"distance":12.499402046203613,"index":30454}]}
